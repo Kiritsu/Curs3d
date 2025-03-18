@@ -1,6 +1,7 @@
 ﻿using System.IO.Compression;
 using System.Text.Json;
 using Curs3d.Models;
+using Curs3d.Serialization;
 
 namespace Curs3d;
 
@@ -8,7 +9,8 @@ public class Curs3dHelper
 {
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
-        PropertyNameCaseInsensitive = true
+        PropertyNameCaseInsensitive = true,
+        TypeInfoResolver = ModpackManifestContext.Default
     };
     
     public static async Task RunAsync(CliOptions options)

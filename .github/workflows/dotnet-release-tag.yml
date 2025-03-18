@@ -1,0 +1,43 @@
+name: .NET
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+        
+    - name: Restore
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build -c Release --no-restore
+      
+    - name: Publish for Windows x64
+      run: dotnet publish Curs3d/Curs3d.csproj -c Release -o ./artifacts/win-x64 -r win-x64 --self-contained true -p:PublishTrimmed=true -p:PublishSingleFile=true
+
+    - name: Publish for Linux x64
+      run: dotnet publish Curs3d/Curs3d.csproj -c Release -o ./artifacts/linux-x64 -r linux-x64 --self-contained true -p:PublishTrimmed=true -p:PublishSingleFile=true
+
+    - name: Zip-Tar releases
+      run: |
+          7z a -tzip "./artifacts/Curs3d-win-x64.zip" "./artifacts/win-x64/*"
+          7z a -tzip "./artifacts/Curs3d-linux-x64.tar.gz" "./artifacts/linux-x64/*"
+    
+    - name: Publish
+      uses: softprops/action-gh-release@v1
+      with:
+        files: "./artifacts/Curs3d*"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
